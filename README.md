@@ -1,3 +1,5 @@
+**Figma plugin
+**
 Remove single-letter words at the end of a line
 
 Sierotki Eliminator tackles a common issue in Polish typography known as "sierotki" (literally "orphans"). In Polish texts, single-letter words like "a", "i", "o", "u", "w", or "z" at the end of a line are considered typographic errors.
