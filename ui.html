@@ -1,0 +1,70 @@
+<html>
+<body>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    select, button { width: 100%; margin-top: 10px; }
+    #status { margin-top: 10px; font-style: italic; }
+  </style>
+  <h2>Library Switcher</h2>
+  <select id="librarySelect">
+    <option value="">Loading libraries...</option>
+  </select>
+  <button id="switchButton" disabled>Switch Component(s)</button>
+  <p id="status">Select component instance(s) to switch</p>
+
+  <script>
+    let libraries = [];
+    let selectedInstanceCount = 0;
+
+    document.getElementById('switchButton').onclick = () => {
+      const targetLibrary = document.getElementById('librarySelect').value;
+      parent.postMessage({ pluginMessage: { type: 'switch-components', targetLibrary } }, '*');
+    };
+
+    window.onmessage = (event) => {
+      const msg = event.data.pluginMessage;
+      if (msg.type === 'libraries') {
+        libraries = msg.libraries;
+        updateLibraryDropdown();
+      } else if (msg.type === 'selectionUpdate') {
+        selectedInstanceCount = msg.instanceCount;
+        updateStatus();
+      }
+    };
+
+    function updateLibraryDropdown() {
+      const select = document.getElementById('librarySelect');
+      if (libraries.length === 0) {
+        select.innerHTML = '<option value="">No libraries available</option>';
+      } else {
+        select.innerHTML = '<option value="">Select a library</option>' + 
+                           libraries.map(lib => `<option value="${lib.id}">${lib.name}</option>`).join('');
+      }
+      updateStatus();
+    }
+
+    function updateStatus() {
+      const status = document.getElementById('status');
+      const switchButton = document.getElementById('switchButton');
+      const librarySelect = document.getElementById('librarySelect');
+
+      if (libraries.length === 0) {
+        status.textContent = 'No libraries available.';
+        switchButton.disabled = true;
+      } else if (selectedInstanceCount === 0) {
+        status.textContent = 'Select component instance(s) to switch';
+        switchButton.disabled = true;
+      } else if (librarySelect.value === "") {
+        status.textContent = `${selectedInstanceCount} instance(s) selected. Choose a library.`;
+        switchButton.disabled = true;
+      } else {
+        status.textContent = `${selectedInstanceCount} instance(s) selected`;
+        switchButton.disabled = false;
+      }
+    }
+
+    // Request libraries when UI loads
+    parent.postMessage({ pluginMessage: { type: 'get-libraries' } }, '*');
+  </script>
+</body>
+</html>
